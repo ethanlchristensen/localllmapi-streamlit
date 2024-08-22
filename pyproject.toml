@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "localllmapi-streamlit"
+version = "0.1.0"
+description = "UI for Local LLM API made by Ethan Lee Christensen"
+authors = ["Ethan Christensen <ethanlchristensen@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+streamlit = "^1.37.1"
+streamlit-extras = "^0.4.7"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
