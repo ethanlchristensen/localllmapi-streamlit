@@ -5,7 +5,8 @@ from .message_utils import (
     render_message_history,
     save_chat_history,
     show_previous_chats,
-    DEFAULT_ASSISTANT_MESSAGE
+    DEFAULT_ASSISTANT_MESSAGE,
+    ASSISTANT_AVATAR
 )
 
 from .ollama_client import OllamaClient
@@ -19,4 +20,5 @@ __all__ = [
     "show_previous_chats",
     "DEFAULT_ASSISTANT_MESSAGE",
     "OllamaClient",
+    "ASSISTANT_AVATAR"
 ]

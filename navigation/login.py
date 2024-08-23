@@ -3,7 +3,7 @@ import json
 
 import streamlit as st
 
-st.info("⬅️ Welcome! Please use the sidebar to login!")
+st.info("Welcome! Please use the sidebar to login!", icon=":material/arrow_back:")
 
 with st.sidebar:
     with st.form(key="login", clear_on_submit=True):
@@ -18,4 +18,4 @@ with st.sidebar:
             st.session_state.display_name = username
             st.rerun()
         else:
-            st.error(body="Incorrect username or password provided. Please try again!", icon=":material/info:")
+            st.error(body="Incorrect username or password provided. Please try again!", icon=":material/error:")

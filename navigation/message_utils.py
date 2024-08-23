@@ -1,11 +1,14 @@
 import os
 import json
+import base64
 import requests
 
 import streamlit as st
 
 from uuid import uuid4
 from enum import Enum
+
+ASSISTANT_AVATAR = ":material/smart_toy:"
 
 
 class MessageComponentType(Enum):
@@ -26,7 +29,7 @@ class MessageComponent:
         data: any,
         expander: bool = False,
         expander_label: str | None = None,
-        **kwargs
+        **kwargs,
     ):
         self.message_component_type = message_component_type
         self.data = data
@@ -38,7 +41,7 @@ class MessageComponent:
         if self.message_component_type == MessageComponentType.TEXT:
             st.markdown(body=self.data, **self.kwargs)
         elif self.message_component_type == MessageComponentType.IMAGE:
-            st.image(image=self.data, **self.kwargs)
+            st.image(image=base64.b64decode(self.data), **self.kwargs)
 
 
 class Message:
@@ -46,7 +49,7 @@ class Message:
         self,
         components: list[MessageComponent],
         user: str = "assistant",
-        icon: str = "😈",
+        icon: str = ASSISTANT_AVATAR,
     ):
         self.components = components
         self.user = user
@@ -85,16 +88,13 @@ def save_chat_history():
             {
                 "user": message.user,
                 "icon": message.icon,
-                "components": [
-                    {
-                        "message_component_type": component.message_component_type.value,
-                        "data": str(component.data),
-                        "expander": component.expander,
-                        "expander_label": component.expander_label,
-                        **component.kwargs,
-                    }
-                    for component in message.components
-                ],
+                "components":[{
+                    "message_component_type": component.message_component_type.value,
+                    "data": component.data,
+                    "expander": component.expander,
+                    "expander_label": component.expander_label,
+                    **component.kwargs,
+                } for component in message.components],
             }
         )
 
@@ -139,7 +139,7 @@ def on_previous_chat_click(*args):
                                 "expander_label",
                                 "message_component_type",
                             }
-                        }
+                        },
                     )
                     for component in message["components"]
                 ],
@@ -147,6 +147,14 @@ def on_previous_chat_click(*args):
         )
 
     st.session_state.messages = messages
+
+
+def on_delete_chat(*args):
+    chat_id = args[0]
+    chats = json.loads(open(os.path.join(os.getcwd(), "db", "chats.json"), "r").read())
+    del chats[chat_id]
+    with open(os.path.join(os.getcwd(), "db", "chats.json"), "w") as file:
+        file.write(json.dumps(chats, indent=4))
 
 
 def show_previous_chats():
@@ -160,11 +168,24 @@ def show_previous_chats():
     if chats:
         with st.sidebar:
             with st.expander(label="Previous Chats", expanded=False):
+                chat_columns = st.columns([1, 0.25])
                 for chat_id in chats:
-                    st.button(
-                        label="Currently Selected" if st.session_state.chat_id == chat_id else (chat_id[:25] + "..."),
-                        use_container_width=True,
-                        disabled=st.session_state.chat_id == chat_id,
-                        args=(chat_id,),
-                        on_click=on_previous_chat_click,
-                    )
+                    with chat_columns[0]:
+                        st.button(
+                            label=(
+                                "Currently Selected"
+                                if st.session_state.chat_id == chat_id
+                                else (chat_id[:25] + "...")
+                            ),
+                            use_container_width=True,
+                            disabled=st.session_state.chat_id == chat_id,
+                            args=(chat_id,),
+                            on_click=on_previous_chat_click,
+                        )
+                    with chat_columns[1]:
+                        st.button(
+                            label=":material/delete:",
+                            key=f"delete_{chat_id}",
+                            on_click=on_delete_chat,
+                            args=(chat_id,),
+                        )
